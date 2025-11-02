@@ -169,6 +169,8 @@ Improvements to reliability (timeouts, retries), safety (robots.txt, rate limiti
 
 ---
 
-## 📄 License
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 
-This project is licensed under the **MIT License**. See `LICENSE` for details.
+## 📄 License
+Released under the **MIT License**. See `LICENSE` for details.
+
