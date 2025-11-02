@@ -1,55 +1,82 @@
-Keyword Spider
+# 🕷️ Keyword Spider
 
-A compact, quick, agile web spider that starts from a single URL, discovers links on each page, and recursively prints URLs that contain a user-supplied keyword. It normalizes links to absolute form, uses a browser-like User-Agent, and caps recursion depth for safety.
+<div align="center">
 
-Status: Minimal reference utility and fast URL filter. Not intended for large-scale crawling.
+**A compact, quick, agile URL spider** — start from one page, discover links, and recursively print only the URLs that contain your keyword.
 
-Features
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-3776AB?logo=python\&logoColor=white)](#requirements)
+[![Requests](https://img.shields.io/badge/Powered%20by-requests-000000.svg)](https://docs.python-requests.org/)
+[![BeautifulSoup](https://img.shields.io/badge/HTML%20Parsing-BeautifulSoup4-4B8BBE.svg)](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
-Keyword-filtered recursion — follows and prints only URLs whose absolute address contains your keyword (case-insensitive).
+</div>
 
-Absolute URL normalization — resolves relative hrefs with urljoin and strips #fragments to reduce duplicates.
+> Minimal reference utility and fast URL filter. Not intended for large-scale crawling.
 
-De-duplication — tracks visited pages in an in-memory set.
+---
 
-Resilient fetching — timeouts, redirects followed, browser-like User-Agent.
+## ✨ Features
 
-Depth control — max_depth prevents runaway crawls.
+* **Keyword-filtered recursion** — follows and prints only URLs whose absolute address contains your keyword (case-insensitive).
+* **Absolute URL normalization** — resolves relative `href`s with `urljoin` and strips `#fragments` to reduce duplicates.
+* **De-duplication** — tracks visited pages in an in-memory `set`.
+* **Resilient fetching** — timeouts, redirects followed, browser-like User-Agent.
+* **Depth control** — `max_depth` prevents runaway crawls.
 
-Requirements
+---
 
-Python: 3.8+
+## 📚 Table of Contents
 
-Packages:
+* [Requirements](#-requirements)
+* [Quickstart](#-quickstart)
+* [Usage](#-usage)
+* [Configuration](#-configuration)
+* [Full Script](#-full-script)
+* [Troubleshooting](#-troubleshooting)
+* [Limitations](#-limitations)
+* [Extensions](#-extensions)
+* [Contributing](#-contributing)
+* [License](#-license)
 
-requests
+---
 
-beautifulsoup4
+## 🔧 Requirements
+
+* **Python**: 3.8+
+* **Packages**:
+
+  * `requests`
+  * `beautifulsoup4`
 
 Install:
 
+```bash
 pip install -U requests beautifulsoup4
+```
 
+Optional `requirements.txt`:
 
-Optional requirements.txt:
-
+```txt
 requests>=2.0
 beautifulsoup4>=4.9
-
+```
 
 Then:
 
+```bash
 pip install -r requirements.txt
+```
 
-Usage
+---
 
-Run the script and answer two prompts:
+## 🚀 Quickstart
 
+```bash
 python spider.py
+```
 
-
-Example session:
-
+```text
 Enter the URL you want to scrape.
 https://en.wikipedia.org/wiki/Programmer
 Enter the keyword to search for in the URL provided.
@@ -58,82 +85,90 @@ https://en.wikipedia.org/wiki/Computer_programmer
 https://en.wikipedia.org/wiki/Programming_language
 ...
 [Done] scanned 37 pages; printed 12 matching URLs.
+```
 
+> **Input tips**
+>
+> * You can enter a bare domain like `example.com`; the script adds `https://` if missing.
+> * Keyword matching is case-insensitive.
 
-Input notes
+---
 
-You can enter a bare domain like example.com; the script adds https:// if missing.
+## 🛠️ Usage
 
-Keyword match is case-insensitive (e.g., news, wiki, about).
+The script is interactive. It asks for:
 
-Config tweaks (inline)
+* **Start URL** (string; `https://` will be added if missing)
+* **Keyword** (case-insensitive substring; e.g., `news`, `wiki`, `about`)
 
-Adjust these in the __main__ call:
+---
 
+## ⚙️ Configuration
+
+Adjust these values in the call at the bottom of the script:
+
+```python
 spider_urls(start, kw, session=s, max_depth=4, verbose=False)
+```
 
+| Option       | Type   | Default | Description                                                           |
+| ------------ | ------ | ------- | --------------------------------------------------------------------- |
+| `max_depth`  | int    | `4`     | Maximum recursion depth.                                              |
+| `verbose`    | bool   | `False` | `True` prints progress lines (`[Fetch]`, `[Parse]`, `[Skip]`).        |
+| `User-Agent` | string | Chrome  | Browser-like header set on the `requests.Session()` for fewer blocks. |
 
-max_depth: recursion limit (default 4).
+---
 
-verbose: set True for progress logs ([Fetch], [Parse], [Skip], errors).
+## 🧪 Troubleshooting
 
-To stay on one site, see Extensions.
+> [!TIP]
+> **No output?**
+>
+> * Enable `verbose=True` to see `[Skip] ... (HTTP 403/429/999)` or other hints.
+> * Try a broader keyword like `/`.
+> * Some sites block bots; the default UA mimics a browser to help.
 
-Code layout
-spider.py
-├─ ensure_scheme()  # Adds https:// to bare domains
-├─ is_href_ok()     # Skips mailto:, javascript:, tel:, fragments, empties
-├─ spider_urls()    # Core DFS: fetch → parse → filter → print → recurse
-└─ __main__         # Interactive prompts + Session (User-Agent)
+> [!WARNING]
+> **Be polite.** Avoid high request rates and respect terms of service.
 
-Troubleshooting
+---
 
-Nothing prints
+## 📌 Limitations
 
-The site might return non-200 (403/429/999). Re-run with verbose=True to see [Skip] ... (HTTP ...).
+* No `robots.txt` checks.
+* No rate limiting or retry/backoff adapter.
+* Domain scoping is off by default.
+* Results are printed to stdout (no file output).
 
-The keyword doesn’t appear in any absolute URL. Test with a broader keyword like / or try a different start page.
+---
 
-The site blocks programmatic clients. Keep the default User-Agent or rotate it.
+## 🔭 Extensions
 
-It crawls too deep/fast
+* **Domain scope (stay on host)**
 
-Lower max_depth, add a tiny delay (time.sleep(0.3)), or add a page counter.
+  ```python
+  from urllib.parse import urlparse
+  start_host = urlparse(start).netloc
 
-Limitations
+  # inside the loop, after computing `absolute`
+  if urlparse(absolute).netloc != start_host:
+      continue
+  ```
 
-No robots.txt checks.
+* **Rate limit**: insert `time.sleep(0.2)` between requests.
 
-No rate limiting or retry/backoff adapter.
+* **Output to file**: write matches to CSV/JSON instead of `print`.
 
-Domain scoping is off by default.
+* **Retries**: attach an `HTTPAdapter` with backoff to the `Session`.
 
-Results are printed to stdout (no file output).
+---
 
-This is intentional to keep the tool compact.
+## 🤝 Contributing
 
-Ethical use
+Improvements to reliability (timeouts, retries), safety (robots.txt, rate limiting), and ergonomics (CLI flags for depth, domain, keyword) are welcome. Please keep examples minimal and add tests where practical.
 
-Respect site Terms of Service and robots.txt.
+---
 
-Be gentle: low request rates, no excessive crawling.
+## 📄 License
 
-Avoid collecting personal data.
-
-Get permission for restricted or large crawls.
-
-Extensions (quick adds)
-
-Domain scope — keep the crawl on the starting host:
-
-from urllib.parse import urlparse
-start_host = urlparse(start).netloc
-
-# inside the loop, after computing `absolute`
-if urlparse(absolute).netloc != start_host:
-    continue
-
-
-Rate limit — insert time.sleep(0.2) between requests.
-Output to file — append matches to CSV/JSON instead of print.
-Retries — use HTTPAdapter with backoff on the Session.
+This project is licensed under the **MIT License**. See `LICENSE` for details.
